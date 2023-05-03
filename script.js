@@ -7,9 +7,13 @@ canvas.height = window.innerHeight;
 const BG_COLOR = '#121212';
 const PLAYER_SPEED = 10;
 const BULLET_SPEED = 10;
+const FLEET_SPEED = 5;
 const MAX_BULLETS = 20;
 
 let randomSpawnTime = Math.floor(Math.random()*1000 + 500);
+
+let score = 0;
+const scoreDiv = document.getElementById('score');
 
 const drawBackground = (color) => {
     ctx.fillStyle = color;
@@ -75,6 +79,15 @@ class Invader {
 
         }
     }
+
+    shoot(invaderProjectiles){
+        invaderProjectiles.push(new InvaderBullet({
+            position:{
+                y: this.position.y + this.height,
+                x: this.position.x + this.width,
+            }
+        }))
+    }
 }
 
 class BattleFleet{
@@ -134,8 +147,32 @@ class Bullet {
     }
 }
 
+class InvaderBullet{
+    constructor({ position }) {
+        this.position = position;
+        this.velocity = {
+            x: 0,
+            y: BULLET_SPEED*0.4,
+        };
+        this.width = 4;
+        this.height = 15;
+    }
+
+    draw(){
+        ctx.fillStyle = '#0000FF';
+        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+    }
+
+    update(){
+        this.draw();
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+    }
+}
+
 const player = new Player();
 const fleets = [];
+const game = {over: false}
 
 let bullets = [];
 
@@ -145,10 +182,14 @@ const keys = {
     Space: { pressed: false },
 }
 
+let invaderBullets = [];
+
 let frameCount = 0;
 
 function animate() {
+    if(game.over) return;
     drawBackground(BG_COLOR);
+
     player.update();
     bullets.forEach((bullet, index) => {
         bullet.update();
@@ -157,7 +198,7 @@ function animate() {
         }
     })
 
-    fleets.forEach(battleFleet => {
+    fleets.forEach((battleFleet, fleetIndex) => {
         battleFleet.update();
         battleFleet.invaders.forEach((invader, i) => {
             invader.update({velocity: battleFleet.velocity});
@@ -166,17 +207,34 @@ function animate() {
                 if(invader.position.x<=bullet.position.x
                 && invader.position.x+invader.width>bullet.position.x
                 && bullet.position.y<=invader.position.y+invader.height){
+                    invader.shoot(invaderBullets);
                     battleFleet.invaders.splice(i, 1);
                     bullets.splice(j, 1);
+                    score+=1;
                 }
             })
-        });
+        })
+        if (battleFleet.invaders.length===0){
+            fleets.splice(fleetIndex, 1);
+        }
+    })
+
+    invaderBullets.forEach((invaderBullet, index)=>{
+        invaderBullet.update();
+        if(invaderBullet.position.y>=canvas.height){
+            invaderBullets.splice(index, 1);
+        }
+        if(invaderBullet.position.y + invaderBullet.height >= player.position.y
+        && invaderBullet.position.x>=player.position.x
+        && invaderBullet.position.x<=player.position.x+player.width){
+            game.over = true;
+        }
     })
 
     if(frameCount % randomSpawnTime===0){
         fleets.push(new BattleFleet({
-            position: {x:0, y:0},
-            velocity: {x: 5, y:0}
+            position: {x:0, y:20},
+            velocity: {x: FLEET_SPEED, y:0}
         }));
         randomSpawnTime = Math.floor(Math.random()*1000 + 500);
     }
@@ -202,7 +260,7 @@ function animate() {
     }
 
     frameCount++;
-
+    scoreDiv.innerText = score;
     window.requestAnimationFrame(animate);
 }
 
