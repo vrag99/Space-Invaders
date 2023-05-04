@@ -4,22 +4,33 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+// Initializing some constants
 const BG_COLOR = '#121212';
 const PLAYER_SPEED = 10;
 const BULLET_SPEED = 10;
 const FLEET_SPEED = 5;
-const MAX_BULLETS = 20;
+const MAX_BULLETS = 10;
 
 let randomSpawnTime = Math.floor(Math.random()*1000 + 500);
 
 let score = 0;
 const scoreDiv = document.getElementById('score');
+const highScoreDiv = document.getElementById('highscore-value');
 
+// Utility functions
 const drawBackground = (color) => {
     ctx.fillStyle = color;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+async function playSound(path){
+    let audio = new Audio();
+    audio.src = path;
+    console.log(path);
+    await audio.play();
+}
+
+// Different components of the game
 class Player {
     constructor() {
         this.velocity = {
@@ -51,7 +62,6 @@ class Player {
             this.position.x += this.velocity.x;
         }
     }
-
 }
 
 class Invader {
@@ -170,11 +180,38 @@ class InvaderBullet{
     }
 }
 
+class Star{
+    constructor(){
+        this.position = {
+            x: Math.random()*canvas.width,
+            y: Math.random()*canvas.height
+        }
+        this.radius = Math.floor(Math.random()*3+1);
+        this.velocity = {x:0, y:0.2};
+    }
+
+    draw(){
+        ctx.beginPath();
+        ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI, false);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+    }
+
+    update(){
+        this.draw();
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+    }
+}
+
 const player = new Player();
 const fleets = [];
+let bullets = [];
+let invaderBullets = [];
+let stars = [];
 const game = {over: false}
 
-let bullets = [];
+let frameCount = 0;
 
 const keys = {
     ArrowLeft: { pressed: false },
@@ -182,13 +219,28 @@ const keys = {
     Space: { pressed: false },
 }
 
-let invaderBullets = [];
-
-let frameCount = 0;
+for(let i=0; i<200; i++) stars.push(new Star());
 
 function animate() {
-    if(game.over) return;
+    if(game.over){
+        localStorage.setItem('score', score);
+        let a = document.createElement('a');
+        a.href = './gameOver.html';
+        a.click();
+        return;
+    }
+
     drawBackground(BG_COLOR);
+
+    stars.forEach((star)=>{
+        star.update();
+        if(star.position.y+star.radius>=canvas.height){
+            star.position = {
+                x: Math.random()*canvas.width,
+                y: 0,
+            }
+        }
+    })
 
     player.update();
     bullets.forEach((bullet, index) => {
@@ -210,6 +262,7 @@ function animate() {
                     invader.shoot(invaderBullets);
                     battleFleet.invaders.splice(i, 1);
                     bullets.splice(j, 1);
+                    playSound('./assets/audio/enemyShoot.wav');
                     score+=1;
                 }
             })
@@ -256,14 +309,25 @@ function animate() {
             },
             velocity: { x: 0, y: -BULLET_SPEED }
         }));
+        playSound('./assets/audio/shoot.wav');
     }
     }
 
     frameCount++;
     scoreDiv.innerText = score;
+    highScoreDiv.innerHTML = localStorage.getItem("highScore");
+    try{
+        let highScore = localStorage.getItem("highScore");
+        if(score > highScore){
+            localStorage.setItem("highScore", score);
+        }
+    } catch{
+        localStorage.setItem("highScore", score);
+    }
     window.requestAnimationFrame(animate);
 }
 
+playSound('./assets/audio/start.mp3');
 animate();
 
 window.addEventListener('keydown', (event) => {

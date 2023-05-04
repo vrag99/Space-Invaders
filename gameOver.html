@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="./assets/spaceship.png">
+    <title>Game Over</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #121212;
+            color: white;
+            font-family: sans-serif;
+        }
+
+        .fullPageCenter {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #gameOver {
+            font-size: 4rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .restart{
+            font-size: 1rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+            cursor: pointer;
+            border-radius: 2rem;
+            background-color: blueviolet;
+            outline: none;
+            border: none;
+            color: rgb(205, 200, 209);
+            transition: all 0.3s;
+        }
+
+        .restart:hover{
+            transform: translateY(-0.2rem);
+            box-shadow: rgba(113, 113, 206, 0.078) 0px 13px 27px -5px, rgba(255, 255, 255, 0.056) 0px 8px 16px -8px;;
+        }
+
+        .your-score, .high-score{
+            font-size: 2rem;
+            margin-top: 0.8rem;
+            font-weight: lighter;
+            
+        }
+
+        .your-score{
+            color: white;
+        }
+
+        .high-score{
+            color: rgb(7, 161, 175);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="fullPageCenter">
+        <p id="gameOver">Game Over!</p>
+        <p class="your-score">Your Score: <span id="userScore"></span></p>
+        <p class="high-score">High Score: <span id="highScore"></span></p>
+        <p></p>
+        <a href="./index.html">
+            <button class="restart">
+                Restart Game
+            </button>
+        </a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', ()=>{
+            let audio = new Audio();
+            audio.src = './assets/audio/gameOver.wav';
+            audio.play();
+        })
+
+        userScoreDiv = document.getElementById('userScore');
+        highScoreDiv = document.getElementById('highScore');
+
+        highScoreDiv.innerHTML = localStorage.getItem("highScore");
+        userScoreDiv.innerHTML = localStorage.getItem("score");
+    </script>
+</body>
+
+</html>

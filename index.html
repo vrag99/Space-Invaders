@@ -1,34 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Invaders</title>
+    <link rel="icon" href="./assets/spaceship.png">
     <style>
-        *{
+        * {
             margin: 0;
             padding: 0;
         }
-        body{
+
+        body {
             overflow-y: hidden;
         }
-        p{
+
+        p {
             color: white;
             position: fixed;
             font-size: 1.5rem;
             padding: 1rem 0.5rem;
             font-family: sans-serif;
+            width: 80%;
+            margin: 0 auto;
         }
 
+        .scores {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
     </style>
 </head>
+
 <body>
-    <p>
-        Score: <span id="score">0</span>
-    </p>
+    <div class="scores">
+        <p>
+            <span>Score: <span id="score">0</span></span>
+            <span style="float: right;">High Score: <span id="highscore-value">0</span></span>
+        </p>
+    </div>
     <canvas>
     </canvas>
     <script src="script.js"></script>
 </body>
+
 </html>
